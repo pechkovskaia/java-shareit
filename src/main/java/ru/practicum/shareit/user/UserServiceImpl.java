@@ -29,15 +29,16 @@ public class UserServiceImpl implements UserService {
     public UserDto update(Long userId, UserDto userDto) {
         User existingUser = getUserOrThrow(userId);
 
-        if (userDto.getEmail() != null && !userDto.getEmail().equals(existingUser.getEmail())
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()
+                && !userDto.getEmail().equals(existingUser.getEmail())
                 && userRepository.existsByEmail(userDto.getEmail())) {
             throw new DuplicatedEmailException("Этот email уже используется: " + userDto.getEmail());
         }
 
-        if (userDto.getName() != null) {
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
             existingUser.setName(userDto.getName());
         }
-        if (userDto.getEmail() != null) {
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
             existingUser.setEmail(userDto.getEmail());
         }
 

@@ -35,10 +35,10 @@ public class ItemServiceImpl implements ItemService {
             throw new ForbiddenException("Редактировать вещь может только её владелец");
         }
 
-        if (itemDto.getName() != null) {
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             existingItem.setName(itemDto.getName());
         }
-        if (itemDto.getDescription() != null) {
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
             existingItem.setDescription(itemDto.getDescription());
         }
         if (itemDto.getAvailable() != null) {
@@ -65,6 +65,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text) {
+        if (text == null || text.isBlank()) {
+            return List.of();
+        }
         return itemRepository.search(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
