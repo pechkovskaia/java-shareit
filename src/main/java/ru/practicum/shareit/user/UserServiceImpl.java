@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicatedEmailException;
@@ -11,13 +12,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
     public UserDto create(UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())) {
+        if (userRepository.existsByEmailIgnoreCase(userDto.getEmail())) {
             throw new DuplicatedEmailException("Этот email уже используется: " + userDto.getEmail());
         }
         User user = UserMapper.toUser(userDto);
@@ -25,13 +28,14 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(savedUser);
     }
 
+    @Transactional
     @Override
     public UserDto update(Long userId, UserDto userDto) {
         User existingUser = getUserOrThrow(userId);
 
         if (userDto.getEmail() != null && !userDto.getEmail().isBlank()
-                && !userDto.getEmail().equals(existingUser.getEmail())
-                && userRepository.existsByEmail(userDto.getEmail())) {
+                && !userDto.getEmail().equalsIgnoreCase(existingUser.getEmail())
+                && userRepository.existsByEmailIgnoreCase(userDto.getEmail())) {
             throw new DuplicatedEmailException("Этот email уже используется: " + userDto.getEmail());
         }
 
@@ -42,7 +46,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setEmail(userDto.getEmail());
         }
 
-        User updatedUser = userRepository.update(existingUser);
+        User updatedUser = userRepository.save(existingUser);
         return UserMapper.toUserDto(updatedUser);
     }
 
@@ -59,6 +63,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public void delete(Long userId) {
         getUserOrThrow(userId);
