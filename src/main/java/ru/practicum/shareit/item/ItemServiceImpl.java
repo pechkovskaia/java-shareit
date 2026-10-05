@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ForbiddenException;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -45,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
             existingItem.setAvailable(itemDto.getAvailable());
         }
 
-        Item updatedItem = itemRepository.update(existingItem);
+        Item updatedItem = itemRepository.save(existingItem);
         return ItemMapper.toItemDto(updatedItem);
     }
 
