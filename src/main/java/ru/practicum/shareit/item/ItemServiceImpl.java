@@ -3,12 +3,17 @@ package ru.practicum.shareit.item;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +24,7 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     public ItemDto create(Long ownerId, ItemDto itemDto) {
@@ -60,9 +66,23 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> findAllByOwner(Long ownerId) {
         checkUserExists(ownerId);
-        return itemRepository.findAllByOwnerId(ownerId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        LocalDateTime now = LocalDateTime.now();
+        List<ItemDto> result = new ArrayList<>();
+
+        for (Item item : itemRepository.findAllByOwnerId(ownerId)) {
+            ItemDto dto = ItemMapper.toItemDto(item);
+            dto.setLastBooking(bookingRepository
+                    .findFirstByItemIdAndStatusAndBookingStartTimeBeforeOrderByBookingStartTimeDesc(
+                            item.getId(), BookingStatus.APPROVED, now)
+                    .map(BookingMapper::toBookingShortDto)
+                    .orElse(null));
+            dto.setNextBooking(bookingRepository.findFirstByItemIdAndStatusAndBookingStartTimeAfterOrderByBookingStartTimeAsc(
+                    item.getId(), BookingStatus.APPROVED, now)
+                    .map(BookingMapper::toBookingShortDto)
+                    .orElse(null));
+            result.add(dto);
+        }
+        return result;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
