@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,16 +20,12 @@ public class ItemDto {
 
     @NotBlank(message = "Название вещи не может быть пустым")
     private String name;
-
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
-
     @NotNull(message = "Статус доступности должен быть указан")
     private Boolean available;
-
     private Long requestId;
-
     private BookingShortDto lastBooking;
-
     private BookingShortDto nextBooking;
+    private List<CommentDto> comments;
 }
