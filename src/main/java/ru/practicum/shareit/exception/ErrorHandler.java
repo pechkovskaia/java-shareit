@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -56,5 +57,13 @@ public class ErrorHandler {
     public ErrorResponse handleUnexpected(Throwable e) {
         log.error("500 Непредвиденная ошибка", e);
         return new ErrorResponse("Произошла непредвиденная ошибка");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        String message = "Unknown " + e.getName() + ": " + e.getValue();
+        log.warn("400 {}", message);
+        return new ErrorResponse(message);
     }
 }
