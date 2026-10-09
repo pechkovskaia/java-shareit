@@ -68,7 +68,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto findById(Long itemId) {
         Item item = getItemOrThrow(itemId);
         List<CommentDto> comments = commentRepository.findAllByItemId(itemId).stream()
-                .map(CommentMapper :: toCommentDto)
+                .map(CommentMapper::toCommentDto)
                 .toList();
         return ItemMapper.toItemDto(item, comments);
     }
