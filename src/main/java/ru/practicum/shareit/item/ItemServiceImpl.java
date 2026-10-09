@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
@@ -32,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
+    @Transactional
     public ItemDto create(Long ownerId, ItemDto itemDto) {
         checkUserExists(ownerId);
         Item item = ItemMapper.toItem(itemDto, ownerId);
@@ -40,6 +41,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto update(Long ownerId, Long itemId, ItemDto itemDto) {
         checkUserExists(ownerId);
         Item existingItem = getItemOrThrow(itemId);
