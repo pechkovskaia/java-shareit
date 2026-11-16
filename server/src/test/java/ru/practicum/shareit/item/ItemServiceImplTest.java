@@ -148,13 +148,6 @@ class ItemServiceImplTest {
         assertThat(found.get(0).getName()).isEqualTo("Дрель");
     }
 
-    @Test
-    void searchShouldReturnEmptyForBlankText() {
-        createItem("Дрель", true);
-
-        assertThat(itemService.search("")).isEmpty();
-    }
-
 
     @Test
     void addCommentShouldSaveWhenUserRentedItem() {

@@ -12,6 +12,8 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -42,18 +44,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new NotFoundException("Пользователя с таким user id не существует");
         }
         List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId);
-        List<ItemRequestDto> result = new ArrayList<>();
-
-        for (ItemRequest request : requests) {
-            List<Item> items = itemRepository.findAllByRequestId(request.getId());
-
-            List<ItemShortDto> shortItems = items.stream()
-                    .map(ItemRequestMapper::toItemShortDto)
-                    .toList();
-
-            result.add(ItemRequestMapper.toItemRequestDto(request, shortItems));
-        }
-        return result;
+        return withItems(requests);
     }
 
     @Override
@@ -62,18 +53,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new NotFoundException("Пользователя с таким user id не существует");
         }
         List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(userId);
-        List<ItemRequestDto> result = new ArrayList<>();
-
-        for (ItemRequest request : requests) {
-            List<Item> items = itemRepository.findAllByRequestId(request.getId());
-
-            List<ItemShortDto> shortItems = items.stream()
-                    .map(ItemRequestMapper::toItemShortDto)
-                    .toList();
-
-            result.add(ItemRequestMapper.toItemRequestDto(request, shortItems));
-        }
-        return result;
+        return withItems(requests);
     }
 
     @Override
@@ -92,6 +72,24 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .toList();
 
         return ItemRequestMapper.toItemRequestDto(request, shortItems);
+    }
+
+    private List<ItemRequestDto> withItems(List<ItemRequest> requests) {
+        List<Long> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .toList();
+
+        Map<Long, List<ItemShortDto>> itemsByRequest = itemRepository
+                .findAllByRequestIdIn(requestIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        Item::getRequestId,
+                        Collectors.mapping(ItemRequestMapper::toItemShortDto, Collectors.toList())));
+
+        return requests.stream()
+                .map(request -> ItemRequestMapper.toItemRequestDto(
+                        request, itemsByRequest.getOrDefault(request.getId(), List.of())))
+                .toList();
     }
 }
 

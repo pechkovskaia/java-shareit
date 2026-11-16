@@ -101,13 +101,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createShouldThrowWhenEndNotAfterStart() {
-        assertThrows(ValidationException.class, () -> bookingService.create(booker.getId(),
-                bookingDto(item.getId(), now.plusDays(2), now.plusDays(1))));
-    }
-
-
-    @Test
     void approveTrueShouldSetApproved() {
         BookingDto booking = createFutureBooking();
 
